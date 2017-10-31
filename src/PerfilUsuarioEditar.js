@@ -1,0 +1,225 @@
+import React, { Component } from 'react';
+import {
+  StyleSheet, Text, View, Image, Dimensions, TextInput,
+  AsyncStorage, Alert, Keyboard, Picker, Modal,
+  TouchableHighlight, TouchableOpacity, ScrollView
+} from 'react-native';
+import { Container, Header, Left, Right, Body, Button, InputGroup, Input, Item, Icon, Label, Separator, Content, Thumbnail } from 'native-base';
+import { Actions, ActionConst } from 'react-native-router-flux';
+import Spinner from 'react-native-loading-spinner-overlay';
+
+import imagens from './Avatar';
+
+import url from './URL';
+
+const janela = Dimensions.get('window');
+
+import moment from 'moment';
+import f from 'tcomb-form-native';
+
+var Form = f.form.Form;
+
+var Genero = f.enums({
+    0: 'Masculino',
+    1: 'Feminino',
+    2: 'LGBT',
+    3: 'Prefiro não informar'
+});
+
+var P = f.struct({
+    nome: f.String,
+    quem: f.maybe(f.String),
+    datanasc: f.Date,
+    sexo: Genero
+});
+
+export default class EditarPerfil extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            perfil: this.props.perfil,
+            modalImagens: false,
+
+            options: {
+                fields: {
+                    nome: {
+                        error: 'Escreva o nome que irá aparecer para os outros.',
+                        maxLength: 50,
+                    },
+                    quem: {
+                        label: 'Quem sou',
+                        multiline: true,
+                        maxLength: 200,
+                        stylesheet: {
+                            ...Form.stylesheet,
+                            textbox: {
+                                ...Form.stylesheet.textbox,
+                                normal: {
+                                    ...Form.stylesheet.textbox.normal,
+                                    height: 100
+                                },
+                                error: {
+                                    ...Form.stylesheet.textbox.error,
+                                    height: 100
+                                }
+                            }
+                        }
+                    },
+                    datanasc: {
+                        label: 'Data de nascimento',
+                        error: 'Selecione sua data de nascimento.'
+                    }
+                },
+                config: {
+                    format: (date) => {
+                        return moment(date).format('DD/MM/YYYY');
+                    }
+                }
+            },
+            value: {
+                nome: this.props.perfil.apelido,
+                quem: this.props.perfil.quem,
+                datanasc: new Date(this.props.perfil.dataNasc),
+                sexo: this.props.perfil.sexo
+            }
+        }
+    }
+
+    // FUNÇÕES
+
+    editar() {
+        var value = this.refs.form.getValue();
+        if (!value)
+            return;
+
+        var data = moment(value.datanasc).format('YYYY/MM/DD').toString();
+        if (data === moment(new Date).format('YYYY/MM/DD').toString()) {
+            Alert.alert('Atenção!', 'Data de nascimento inválida!');
+            return;
+        }
+
+        var perf = {
+            idUsuario: this.state.perfil.idUsuario,
+            nome: value.nome,
+            dataNasc: data,
+            quem: value.quem,
+            sexo: value.sexo,
+            foto: this.state.perfil.foto
+        };
+        
+        fetch(url + '/usuario/editarperfil', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                usuario: perf
+            })
+        }).then((response) => response.json())
+            .then((responseJson) => {
+                if (responseJson.sucesso) {
+                    this.voltar();
+                    //Alert.alert(' ', 'Editado com sucesso!');
+                } else {
+                    Alert.alert(' ', responseJson.erro);
+                }    
+            }).catch((error) => {console.warn(error); });
+    }
+
+    escolheFoto = (item) => {
+        this.state.perfil.foto = item;
+        this.setState({perfil: this.state.perfil});
+        this.setState({modalImagens: false});
+    }
+
+    voltar() {
+        Actions.replace('PerfilUsuario', { atualizar: true });
+    }
+
+    // RENDER
+
+    render() {
+        return (
+            <Container>
+                <Header style={styles.header}>
+                    <Icon name="arrow-back" style={{padding:10}} onPress={() => this.voltar()} />
+                    <TouchableOpacity onPress={() => this.editar()} style={{padding: 10}}><Text>Salvar</Text></TouchableOpacity>
+                </Header>
+                <Content>
+                <TouchableOpacity onPress={() => {this.setState({modalImagens: true})}}>
+                    <Thumbnail 
+                        large 
+                        style={{paddingBottom:10,alignSelf:'center'}} 
+                        source={{
+                            uri: this.state.perfil.foto == null ? 
+                            url + '/imagens/perfil/nao_existe.png' : 
+                            url + this.state.perfil.foto}}
+                    />
+                </TouchableOpacity>                
+                    <Form
+                        ref="form"
+                        type={P}
+                        options={this.state.options}
+                        value={this.state.value}
+                    />
+                </Content>
+
+                <Modal
+                    animationType={"slide"}
+                    transparent={false}
+                    visible={this.state.modalImagens}
+                    onRequestClose={() => {this.setState({modalImagens: false})}}
+                >
+                    <View style={{marginTop: 20, justifyContent:'center' }}>
+                        <View style={{alignItems: 'flex-start', paddingLeft: 20}} >
+                            <TouchableOpacity onPress={() => {this.setState({modalImagens: false})}}>
+                                <Icon name='arrow-back' style={{color: 'black'}}/>
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView>
+                            <View style={styles.imagens}>
+                            {
+                                imagens.map((item, index) => {
+                                return (
+                                    <TouchableOpacity key={index} onPress={ () => {this.escolheFoto(item)} }>
+                                        <Thumbnail key={index} large source={{uri: url + item }} />
+                                    </TouchableOpacity>
+                                )
+                                })
+                            }
+                            </View>
+                        </ScrollView>
+                    </View>
+                </Modal>
+            </Container>
+        );
+    }
+}
+
+const styles = {
+    header: {
+        backgroundColor: '#FAFAFA',
+        //flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: 40
+    },
+    button: {
+        backgroundColor: "#91C744",
+        paddingVertical: 20,
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 30,
+        marginBottom: 30
+    },
+    imagens: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        paddingTop: 10,
+        paddingBottom: 25,
+    },
+}
