@@ -25,6 +25,8 @@ import url from './URL';
 
 import Geral from './Geral';
 
+import Hr from './Hr';
+
 import {MenuAtualizacoes} from './Menu';
 
 import FBSDK, { LoginButton, AccessToken, GraphRequestManager, GraphRequest, LoginManager } from 'react-native-fbsdk';
@@ -48,6 +50,9 @@ export default class Login extends Component {
     };
 
     this.postLogin = this.postLogin.bind(this);
+
+    console.warn(height);
+
   }
 
 
@@ -150,7 +155,7 @@ export default class Login extends Component {
                   accessToken: accessToken,
                   parameters: {
                     fields: {
-                      string: 'email,name,picture,gender,birthday,location'
+                      string: 'email,name,picture,gender,birthday'
                     }
                   }
                 },
@@ -263,21 +268,27 @@ export default class Login extends Component {
             }
             onLogoutFinished={() => alert("logout.")} />
 */}
-            <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}} onPress={() => this._fbAuth()}>
-               <Icon name='logo-facebook' style={{color: '#3b5998', marginRight: 10}}/><Text style={{color: '#3b5998'}}>Entrar com Facebook</Text>
+      
+
+            <Hr text="ou" margin={0} />
+
+            <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'row', marginTop: height * 0.018}} onPress={() => this._fbAuth()}>
+               <Icon name='logo-facebook' style={{color: '#3b5998', marginRight: 10}}/><Text style={{color: '#3b5998', fontWeight: 'bold'}}>Entrar com Facebook</Text>
             </TouchableOpacity>
-          
+
 
           
         </View>
         </Content>
 
-        <View style={{alignItems: 'center', marginLeft: height * 0.043, marginRight: height * 0.043}}>
-          <Text>ou</Text>
-        </View>
-        <View style={{marginBottom: height * 0.02, marginLeft: height * 0.043, marginRight: height * 0.043, marginTop: height * 0.01, justifyContent: 'center', alignItems: 'center'}}>
+        
+          
+       
+        <View style={{marginBottom: height * 0.02, marginLeft: height * 0.043, marginRight: height * 0.043, marginTop: 5, justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}}>
+          
+          <Text style={{color: '#555555'}}>Não possui uma conta? </Text>
           <TouchableOpacity onPress={this.cadastro}>
-            <Text style={{color: '#555555', fontWeight: 'bold'}}>CRIAR UMA CONTA</Text>
+            <Text style={{color: '#555555', fontWeight: 'bold'}}> Cadastre-se aqui</Text>
           </TouchableOpacity>
         </View>
 
