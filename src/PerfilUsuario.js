@@ -218,8 +218,6 @@ export default class PerfilUsuario extends Component {
                 idUsuario: this.meu_id,
                 naoQuerNotificacoes: valor
             })}).then((response) => response.json()).then((responseJson) => {
-                if (responseJson.sucesso)
-                    console.warn('salvou');
             }).catch((error) => { console.warn('receberNotificacoes: '+ error); });
     }
 
@@ -351,16 +349,17 @@ export default class PerfilUsuario extends Component {
     renderHeader() {
         return (
             <Header style={styles.header}>
-                <Icon name="arrow-back" style={{padding:10}} onPress={() => this.voltar()} />
+                {!this.state.mostraItens && <Icon name="arrow-back" style={{padding:10}} onPress={() => this.voltar()} />}
+                {this.state.mostraItens && <Text>Perfil</Text>}
             </Header>
         )
     }
 
     /* <View style={{flexDirection:'row',alignItems:'center'}}>
-                        <Text style={{fontSize:10,color:'#2F7E87'}}>Offline</Text>
-                        <Switch value={this.state.status} onValueChange={this.onoff} tintColor="red" onTintColor="green" />
-                        <Text style={{fontSize:10,color:'#2F7E87'}}>Online</Text>
-                    </View> */
+            <Text style={{fontSize:10,color:'#2F7E87'}}>Offline</Text>
+            <Switch value={this.state.status} onValueChange={this.onoff} tintColor="red" onTintColor="green" />
+            <Text style={{fontSize:10,color:'#2F7E87'}}>Online</Text>
+        </View> */
 
     renderID() {
         return (
@@ -514,9 +513,9 @@ export default class PerfilUsuario extends Component {
     renderConfiguracoes() {
         if (this.state.mostraItens) {
             return (
-                <View style={{padding:10}}>
-                    <Card>
-                        <View style={styles.secao}><Text style={styles.titulo}>OPÇÕES</Text></View>
+                <View style={{padding:10,paddingTop:-5}}>
+                    <Card transparent>
+                        <View style={styles.secao}><Text style={{color:'darkgray',fontSize:15,fontWeight:'bold'}}>OPÇÕES</Text></View>
                         <List>
                             <ListItem icon onPress={this.reportarModalProblema}>
                                 <Left><Icon name="warning" style={{fontSize:20,color:'orange'}} /></Left>
@@ -525,7 +524,7 @@ export default class PerfilUsuario extends Component {
                             </ListItem>
                             <ListItem icon onPress={this.receberNotificacoes}>
                                 <Left><Icon name="notifications" style={{fontSize:20,color:'green'}} /></Left>
-                                <Body><Text note>Receber Notificações</Text></Body>
+                                <Body><Text note>Não Receber Notificações</Text></Body>
                                 <Right><Switch value={this.state.perfil.notificar} onValueChange={(valor) => this.receberNotificacoes(valor)} /></Right>
                             </ListItem>
                             <ListItem icon onPress={this.trocarPerfil}>
@@ -541,7 +540,7 @@ export default class PerfilUsuario extends Component {
             return (
                 <View style={{padding:10,paddingTop:-5}}>
                     <Card>
-                        <View style={styles.secao}><Text style={styles.titulo}>OPÇÕES</Text></View>
+                        <View style={styles.secao}><Text style={{color:'darkgray',fontSize:15,fontWeight:'bold'}}>OPÇÕES</Text></View>
                         <List>
                             <ListItem icon onPress={this.conversar}>
                                 <Left><Icon name="chatboxes" style={{fontSize:20,color:'green'}} /></Left>
@@ -689,7 +688,7 @@ const styles = {
         backgroundColor: '#FAFAFA',
         //flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        //justifyContent: 'space-between',
         height: 40
     },
     titulo: {
