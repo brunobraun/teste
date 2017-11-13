@@ -1,0 +1,1 @@
+export default url = "https://www.ombroamigo.com.br";
