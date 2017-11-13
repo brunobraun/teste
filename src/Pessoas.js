@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { AsyncStorage, TouchableOpacity, ScrollView, Dimensions, Separator,
          Alert, TextInput, TouchableHighlight, KeyboardAvoidingView, Image, Keyboard } from 'react-native';
-import { Container, Icon, View, 
+import { Container, Icon, View, Item, Input,
          DeckSwiper, Card, CardItem, Thumbnail, 
          Text, Body, Button, StyleProvider, Content, Right,
          Segment, Fab, Left, Header, Badge, Spinner, Footer, FooterTab } from 'native-base';
@@ -107,15 +107,7 @@ export default class Pessoas extends Component {
         if (this.state.pessoas.length > 0) {
             return (
                 <Container style={styles.tela}>
-                    <Header style={styles.header}>
-                        <TextInput 
-                            style={{flex:1}}
-                            placeholder="Procure por uma palavra..."
-                            onChangeText={(text) => this.setState({pesquisa: text})}
-                            value={this.state.pesquisa}
-                        />
-                        <Button small style={{backgroundColor:'#4FD3E2'}} onPressOut={Keyboard.dismiss} onPress={this.pesquisar}><Icon name="search" /></Button>
-                    </Header>
+                    {this.renderPesquisa()}
                     <DeckSwiper
                         dataSource={this.state.pessoas}
                         renderItem={item =>
@@ -130,18 +122,33 @@ export default class Pessoas extends Component {
         } else { return ( <Spinner animating={true} color={'#4FD3E2'} /> ) }
     }
 
+    renderPesquisa() {
+        return (
+            <Header style={styles.header}>
+                <TextInput 
+                    style={{flex:1}}
+                    placeholder="Pesquise por uma palavra..."
+                    onChangeText={(text) => this.setState({pesquisa: text})}
+                    value={this.state.pesquisa}
+                    maxLength={30}
+                />
+                <Button small style={{backgroundColor:'#4FD3E2'}} onPressOut={Keyboard.dismiss} onPress={this.pesquisar}><Icon name="search" /></Button>
+            </Header>
+        )
+    }
+
     renderDadosPerfil(item) {
         return (
             <Container>
                 <Content>
                     {this.renderID(item)}
                     {this.renderBiografia(item)}
-                    {this.renderAcoes(item)}
+                    {this.renderTags(item)}
                 </Content>
 
                 <Footer style={{backgroundColor:'#fff',elevation:0,borderTopWidth:0.5,borderColor:'#4FD3E2'}}>
                     <FooterTab style={{backgroundColor:'#fff',elevation:0}}>
-                        <Body>{this.renderTags(item)}</Body>
+                        <Body>{this.renderAcoes(item)}</Body>
                     </FooterTab>
                 </Footer>
             </Container>
@@ -188,20 +195,18 @@ export default class Pessoas extends Component {
     renderTags(usr) {
         if (usr.usuario.tags.length > 0) {
             return (
-                <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                    <View style={styles.tags}>
-                        {usr.usuario.tags.map((item, index) => {
-                            if (usr.usuario.tags.length > 0) {
-                                return (
-                                    <View key={index} style={styles.tag}>
-                                        <Icon name="radio-button-off" style={{fontSize:15,color:item.cor}} />
-                                        <Text style={{fontSize:12,color:'#4FD3E2'}}>{item.nome}</Text>
-                                    </View>
-                                );
-                            }
-                        })}
-                    </View>
-                </ScrollView>
+                <View style={styles.tags}>
+                    {usr.usuario.tags.map((item, index) => {
+                        if (usr.usuario.tags.length > 0) {
+                            return (
+                                <View key={index} style={styles.tag}>
+                                    <Icon name="radio-button-off" style={{fontSize:15,color:item.cor}} />
+                                    <Text style={{fontSize:12,color:'#4FD3E2'}}>{item.nome}</Text>
+                                </View>
+                            );
+                        }
+                    })}
+                </View>
             )
         } else {
             return (
@@ -219,7 +224,7 @@ export default class Pessoas extends Component {
                 <Left>
                     <Button style={{backgroundColor:'#4FD3E2',borderRadius:5}} small iconLeft onPress={() => this.perfil(item.usuario.idUsuario)}>
                         <Icon name="person" style={{fontSize:20}} />
-                        <Text uppercase={false}>Conhecer</Text>
+                        <Text uppercase={false}>Ver Perfil</Text>
                     </Button>
                 </Left>
                 <Right>                
@@ -242,7 +247,6 @@ const styles = {
         height: 40
     },
     acoes: {
-        marginTop:janela.width-325,
         flexDirection:'row',
         paddingLeft:janela.width*0.03,
         paddingRight:janela.width*0.03
@@ -263,7 +267,7 @@ const styles = {
         fontWeight: 'bold',
     },
     biografia: {
-        height: janela.height*0.27,
+        height: janela.height-450,
         padding: 15,
         paddingTop: 25
     },
@@ -298,7 +302,7 @@ const styles = {
         alignItems: 'center',
     },
     tags: {
-        flexDirection: 'column',
+        flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'center',
         alignItems:'center',

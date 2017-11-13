@@ -29,11 +29,11 @@ const options = {
                     ...Form.stylesheet.textbox,
                     normal: {
                         ...Form.stylesheet.textbox.normal,
-                        height: 100
+                        height: 300
                     },
                     error: {
                         ...Form.stylesheet.textbox.error,
-                        height: 100
+                        height: 300
                     }
                 }
             }
@@ -153,11 +153,11 @@ export default class NovaHistoria extends Component {
                     <Icon name="arrow-back" style={{padding:10}} onPress={this.voltar} />
                     <Right>
                         {this.state.mostraExcluir && <TouchableOpacity onPress={this.excluir}><Text style={{color:'red',paddingRight:30}}>Excluir</Text></TouchableOpacity>}
-                        <TouchableOpacity onPress={this.salvar}><Text>Salvar</Text></TouchableOpacity>
                     </Right>
                 </Header>
-                <Content>
+                <Content style={{padding:15}}>
                     {this.renderForm()}
+                    {this.renderAcoes()}
                 </Content>
             </Container>
         );
@@ -175,6 +175,18 @@ export default class NovaHistoria extends Component {
             </View>
         );
     }
+
+    renderAcoes() {
+        return (
+            <View>
+                <TouchableOpacity activeOpacity={.5} onPress={this.salvar}>
+                    <View style={styles.button}>
+                        <Text style={styles.buttonText}>Salvar</Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
+        )
+    }
 }
 
 const styles = {
@@ -184,5 +196,15 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'space-between',
         height: 40
+    },
+    button: {
+        backgroundColor: "#4FD3E2",
+        paddingVertical: 10,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    buttonText: {
+        color: "#FFF",
+        fontSize: 18,
     },
 }

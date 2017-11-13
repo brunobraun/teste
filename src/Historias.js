@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { AsyncStorage, TouchableOpacity, ScrollView, Dimensions,
-         Alert, TextInput, TouchableHighlight, KeyboardAvoidingView, Text } from 'react-native';
+         Alert, TextInput, TouchableHighlight, KeyboardAvoidingView, Text, Keyboard } from 'react-native';
 import { Container, Icon, View, Footer, Label,
          DeckSwiper, Card, CardItem, Thumbnail, 
          Body, Button, StyleProvider, Content,
@@ -27,10 +27,10 @@ export default class Historias extends Component {
             historias: [],
             historiaAtual: [],
             tags: [],
+            pesquisa: ''
         }
 
-        this.esquerda = this.esquerda.bind(this);
-        this.direita = this.direita.bind(this);
+        this.pesquisar = this.pesquisar.bind(this);
     }
 
     // NATIVE
@@ -38,8 +38,6 @@ export default class Historias extends Component {
     componentWillMount() {
         this.meu_id = parseInt(MeuId.getId());
         this.historias();
-
-        //moment.locale('pt-BR');
     }
 
     componentWillReceiveProps(props_recebidas) {
@@ -101,64 +99,102 @@ export default class Historias extends Component {
             }).catch((error) => { console.warn('criaConexao: ' + error); });
     }
 
-    esquerda(item) {
-        console.warn('esquerda: ' + item.titulo);
-    }
-
-    direita() {
-        console.warn('direita');
+    pesquisar() {
+        if (this.state.pesquisa != '') {
+            fetch(url + '/historia/pesquisar?id='+this.meu_id+'&palavra='+this.state.pesquisa)
+            .then((response) => response.json())
+            .then((responseJson) => {
+                if (responseJson.sucesso) {
+                    this.setState({historias: responseJson.historias, pesquisa: ''});
+                } else {
+                    Alert.alert('Oops!', 'Nenhuma História encontrada com ' + this.state.pesquisa);
+                    this.setState({pesquisa: ''});
+                }
+        }).catch((error) => {console.warn('pesquisar: ' + error);});
+        }
     }
 
     // RENDER
 
     render() {
-        return (
-            <Container style={styles.tela}>
-                {this.renderHistorias()}
-            </Container>
-        );
-    }
-
-    renderHistorias() {
         if (this.state.historias.length > 0) {
             return (
-                <DeckSwiper
-                    //onSwipeLeft={this.esquerda}
-                    //onSwipeRight={this.direita}
-                    dataSource={this.state.historias}
-                    renderItem={item =>
-                    <Card style={{elevation:3}}>
-                        <CardItem>
-                            <Left style={{flexDirection:'column',marginBottom:-10}}>
-                                <Text style={styles.titulo}>{item.titulo}</Text>
-                                <Text note style={styles.data}>{moment(item.datahora).format('LL')}</Text>
-                            </Left>
-                        </CardItem>
-                        <View style={styles.scroll}>
-                            <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                                <CardItem>
-                                    <Text style={styles.texto}>{item.historia}</Text>
-                                </CardItem>
-                            </ScrollView>
-                            <CardItem>
-                                <Body style={styles.botoes}>
-                                    {this.renderAcoes(item)}
-                                </Body>
-                            </CardItem>
-                        </View>
-                    </Card>}
-                />
+                <Container style={styles.tela}>
+                    {this.renderPesquisa()}
+                    <DeckSwiper
+                        dataSource={this.state.historias}
+                        renderItem={item =>
+                            <Card style={{elevation:3}}>
+                                <View style={{height:janela.height-160}}>
+                                    {this.renderHistoria(item)}
+                                </View>
+                            </Card>}
+                    />
+                </Container>
             );
         } else { return ( <Spinner animating={true} color={'#4FD3E2'} /> ) }
     }
 
+    renderPesquisa() {
+        return (
+            <Header style={styles.header}>
+                <TextInput 
+                    style={{flex:1}}
+                    placeholder="Pesquise por uma palavra..."
+                    onChangeText={(text) => this.setState({pesquisa: text})}
+                    value={this.state.pesquisa}
+                    maxLength={30}
+                />
+                <Button
+                    small
+                    style={{backgroundColor:'#4FD3E2'}}
+                    onPressOut={Keyboard.dismiss}
+                    onPress={this.pesquisar}
+                >
+                    <Icon name="search" />
+                </Button>
+            </Header>
+        )
+    }
+
+    renderHistoria(item) {
+        return (
+            <Container>
+                <Content>
+                    <View style={styles.info}>
+                        <Text style={styles.titulo}>{item.titulo}</Text>
+                        <Text note style={styles.data}>Criada dia {moment(item.datahora).format('LL')}</Text>
+                        <Text note style={styles.nome}>por {item.nome}</Text>
+                        <Thumbnail
+                            style={styles.avatar}
+                            source={{uri: item.foto == null ? url + '/imagens/perfil/nao_existe.png' : url + item.foto}}
+                        />
+                    </View>
+                    <View style={styles.scroll}>
+                        <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
+                            <CardItem>
+                                <Text style={styles.texto}>{item.historia}</Text>
+                            </CardItem>
+                        </ScrollView>                            
+                    </View>
+                </Content>
+
+                <Footer style={{backgroundColor:'#fff',elevation:0,borderTopWidth:0.5,borderColor:'#4FD3E2'}}>
+                    <FooterTab style={{backgroundColor:'#fff',elevation:0}}>
+                        <Body>{this.renderAcoes(item)}</Body>
+                    </FooterTab>
+                </Footer>
+            </Container>
+        )
+    }
+
     renderAcoes(item) {
         return (
-            <View style={styles.botoes}>
+            <View style={styles.acoes}>
                 <Left>
                     <Button style={{backgroundColor:'#4FD3E2',borderRadius:5,}} small iconLeft onPress={() => this.perfil(item.idUsuario)}>
                         <Icon name="person" style={{fontSize:20}} />
-                        <Text style={{color:'#fff',fontWeight:'bold',padding:10}}>Conhecer</Text>
+                        <Text style={{color:'#fff',fontWeight:'bold',padding:10}}>Ver Perfil</Text>
                     </Button>
                 </Left>
                 <Right>                
@@ -173,31 +209,49 @@ export default class Historias extends Component {
 }
 
 const styles = {
+    info: {
+        flexDirection:'column',
+        alignItems:'center',
+        padding: 10,
+    },
+    header: {
+        backgroundColor: '#FAFAFA',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: 40
+    },
     titulo: {
       fontSize: 16,
       fontWeight:'bold',
-      color:'#2F7E87'
+      color:'#2F7E87',
     },
     texto: {
-        fontSize: 12,
-        fontFamily: 'serif'
+        fontSize: 13,
+        fontFamily: 'serif',
+        lineHeight: 20
     },
     data: {
         fontSize: 10
+    },
+    nome: {
+        fontSize: 11
+    },
+    avatar: {
+        height: 24,
+        width: 24,
+        borderRadius: 12
     },
     tela: {
       flex: 1,
       backgroundColor: '#4F4F4F',
       padding: 20
     },
-    botoes: {
-        flexDirection: 'row',
-        //justifyContent: 'space-between',
-        //alignItems: 'center',
-        //paddingLeft:janela.width*0.02,
-        //paddingRight:janela.width*0.02,
+    acoes: {
+        flexDirection:'row',
+        paddingLeft:janela.width*0.03,
+        paddingRight:janela.width*0.03
     },
     scroll: {
-        height: janela.height-185,
+        height: 250,
     }
   }

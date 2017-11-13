@@ -2,7 +2,7 @@ import FCM from "react-native-fcm";
 
 
 // nenhuma das 3
-import { AsyncStorage } from 'react-native';
+import { AsyncStorage, Alert } from 'react-native';
 import MeuId from './MeuId';
 import { SignalR } from './SignalR';
 
@@ -29,7 +29,7 @@ export default class Geral {
 	        .then((responseJson) => {
 
 	          if(responseJson.sucesso){
-	          	//console.warn('token salva no servidor');
+	          	console.warn('token salva no servidor');
 	          } else {
 	            Alert.alert('Erro', responseJson.erro);
 	          }

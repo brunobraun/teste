@@ -53,6 +53,7 @@ export default class Splash extends Component {
         }
         else {
           setTimeout(() => {Actions.PrimeiroAcessoIntroducao()}, 200);
+          //setTimeout(() => {Actions.IntroducaoAssuntos()}, 200);
         }
         return true;
     }

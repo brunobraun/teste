@@ -3,6 +3,10 @@ import { View, Text } from 'react-native';
 import { Container, Content, Card, CardItem, Header, Icon, Label } from 'native-base';
 import { Actions } from 'react-native-router-flux';
 
+import moment from 'moment';
+import 'moment/locale/pt-br';
+moment.locale('pt-BR');
+
 export default class Historia extends Component {
     constructor(props) {
         super(props);
@@ -29,8 +33,9 @@ export default class Historia extends Component {
         return (
             <View>
                 <Card>
-                    <CardItem style={{justifyContent:'center'}}>
+                    <CardItem style={{justifyContent:'center',flexDirection:'column'}}>
                         <Label style={styles.titulo}>{this.props.historia.titulo}</Label>
+                        <Text note style={styles.data}>Criada dia {moment(this.props.historia.datahora).format('LL')}</Text>
                     </CardItem>
                     <CardItem>
                         <Text style={styles.texto}>{this.props.historia.historia}</Text>
@@ -48,8 +53,12 @@ const styles = {
         color:'#2F7E87'
     },
     texto: {
-        fontSize: 12,
-        fontFamily: 'serif'
+        fontSize: 13,
+        fontFamily: 'serif',
+        lineHeight: 20
+    },
+    data: {
+        fontSize: 10
     },
     header: {
         backgroundColor: '#FAFAFA',

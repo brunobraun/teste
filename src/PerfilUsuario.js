@@ -39,25 +39,18 @@ export default class PerfilUsuario extends Component {
             status: false,
         }
 
-        this.MEUPERFIL = [
-            'Editar Dados Pessoais',
-            'Escolher Assuntos',
-            'Criar Nova História',
-            'Reportar um Problema',
-            'Sair (Trocar de Usuário)',
-            'Cancelar',
-        ];
-
-        this.TEUPERFIL = [
-            'Conversar',
-            'Denunciar',
-            'Cancelar',
-        ];
-
         this.conversar = this.conversar.bind(this);
         this.criaConexao = this.criaConexao.bind(this);
         this.voltarTagsEdicao = this.voltarTagsEdicao.bind(this);
         this.editarTags = this.editarTags.bind(this);
+        this.modalEditarTags = this.modalEditarTags.bind(this);
+        this.novahistoria = this.novahistoria.bind(this);
+        this.editarperfil = this.editarperfil.bind(this);
+        this.reportarModalProblema = this.reportarModalProblema.bind(this);
+        this.reportarModalDenuncia = this.reportarModalDenuncia.bind(this);
+        this.trocarPerfil = this.trocarPerfil.bind(this);
+        this.conversar = this.conversar.bind(this);
+        this.receberNotificacoes = this.receberNotificacoes.bind(this);
     }
 
     // NATIVO
@@ -123,37 +116,12 @@ export default class PerfilUsuario extends Component {
         Actions.pop();
     }
 
-    funcoesMenu(indexMenu, quem) {
-        let idMenu = parseInt(indexMenu);
-        let id = this.props.id == undefined ? this.meu_id : this.props.id;
-        if (quem == 'MEU') {
-            switch(idMenu) {
-                case 0:
-                    Actions.PerfilUsuarioEditar({perfil: this.state.perfil});
-                    break;
-                case 1:
-                    this.modalEditarTags();
-                    break;
-                case 2:
-                    Actions.NovaHistoria({id: id});
-                    break;
-                case 3:
-                    this.setState({modalProblema: true});
-                    break;
-                case 4:
-                    this.trocarPerfil();
-                    break;
-            }
-        } else {
-            switch(idMenu) {
-                case 0:
-                    this.conversar();
-                    break;
-                case 1:
-                    this.setState({modalDenuncia: true});
-                    break;
-            }
-        }
+    editarperfil() {
+        Actions.PerfilUsuarioEditar({perfil: this.state.perfil})
+    }
+
+    novahistoria() {
+        Actions.NovaHistoria({id: id})
     }
 
     conversar() {
@@ -191,6 +159,10 @@ export default class PerfilUsuario extends Component {
             }).catch((error) => { console.warn('criaConexao: ' + error); });
     }
 
+    reportarModalDenuncia() {
+        this.setState({modalDenuncia: true})
+    }
+
     denunciar(usr) {
         fetch(url + '/denuncia/denunciar', {
         method: 'POST',
@@ -208,6 +180,10 @@ export default class PerfilUsuario extends Component {
                 Alert.alert(' ', 'Denúncia enviada com sucesso!');
             } else { Alert.alert('A Denúncia não pôde ser enviada.', responseJson.erro); }
         }).catch((error) => {console.warn(error);});
+    }
+
+    reportarModalProblema() {
+        this.setState({modalProblema: true})
     }
 
     reportar() {
@@ -228,27 +204,49 @@ export default class PerfilUsuario extends Component {
             }).catch((error) => {console.warn('reportar: '+error);});
     }
 
-    trocarPerfil = () => {
-        fetch(url + '/login/limpaToken', {
+    receberNotificacoes(valor) {
+        this.state.perfil.notificar = valor;
+        this.forceUpdate();
+
+        fetch(url + '/Login/AtualizaPrivacidade', {
             method: 'POST',
             headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              idUsuario: MeuId.getId()
-            })
-          }).then((response) => response.json())
-              .then((responseJson) => {
-                AsyncStorage.clear();
-                SignalR.desconectar();
-                Actions.Login();
+                idUsuario: this.meu_id,
+                naoQuerNotificacoes: valor
+            })}).then((response) => response.json()).then((responseJson) => {
+                if (responseJson.sucesso)
+                    console.warn('salvou');
+            }).catch((error) => { console.warn('receberNotificacoes: '+ error); });
+    }
 
-              })
-              .catch((error) => {
-                console.warn('erro');
-
-            });
+    trocarPerfil() {
+        Alert.alert(
+            'Atenção!',
+            'Você não receberá notificações depois de sair. Deseja sair?',
+            [
+                {text: 'Não'},
+                {text: 'Sim', onPress: () => {
+                    fetch(url + '/login/limpaToken', {
+                        method: 'POST',
+                        headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                        idUsuario: MeuId.getId()
+                        })
+                    }).then((response) => response.json())
+                        .then((responseJson) => {
+                            AsyncStorage.clear();
+                            SignalR.desconectar();
+                            Actions.Login();
+                        }).catch((error) => { console.warn('erro'); });
+                }}
+            ]);
     }
 
     voltarTagsEdicao() {
@@ -308,25 +306,25 @@ export default class PerfilUsuario extends Component {
             }).catch((error) => { console.warn('editarTags: ' + error); });
     }
 
-    // onoff() {
-    //     this.setState({status: !this.state.status});
+    /* onoff() {
+        this.setState({status: !this.state.status});
 
-    //     fetch(url + '/usuario/alterarstatus', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Accept': 'application/json',
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({
-    //             usuario: this.state.perfil
-    //         })
-    //     }).then((response) => response.json())
-    //         .then((responseJson) => {
-    //             if (responseJson.sucesso) {
-    //                 console.warn('OK');
-    //             }
-    //         }).catch((error) => {console.warn('onoff: '+error); });
-    // }
+        fetch(url + '/usuario/alterarstatus', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                usuario: this.state.perfil
+            })
+        }).then((response) => response.json())
+            .then((responseJson) => {
+                if (responseJson.sucesso) {
+                    console.warn('OK');
+                }
+            }).catch((error) => {console.warn('onoff: '+error); });
+    } */
 
     // RENDER
 
@@ -340,6 +338,7 @@ export default class PerfilUsuario extends Component {
                         {this.renderBiografia()}
                         {this.renderTags()}
                         {this.renderHistorias()}
+                        {this.renderConfiguracoes()}
                     </ScrollView>
                 </Content>
                 {this.renderModalDenuncia()}
@@ -350,45 +349,11 @@ export default class PerfilUsuario extends Component {
     }
 
     renderHeader() {
-        if (this.props.id != undefined) {
-            return (
-                <Header style={styles.header}>
-                    <Icon name="arrow-back" style={{padding:10}} onPress={() => this.voltar()} />
-                    <Text>Perfil</Text>
-                    <Button transparent onPress={() => ActionSheet.show(
-                        {
-                            options: this.TEUPERFIL,
-                            cancelButtonIndex: 3,
-                            title: "Selecione uma opção..."
-                        },
-                        buttonIndex => {
-                            this.funcoesMenu(buttonIndex, 'TEU');
-                        }
-                        )}>
-                        <Icon name='menu' style={{color: '#2F7E87'}} />
-                    </Button>
-                </Header>
-            );
-        } else {
-            return (
-                <Header style={styles.header}>
-                    <View />
-                    <Text>Perfil</Text>
-                    <Button transparent onPress={() => ActionSheet.show(
-                        {
-                            options: this.MEUPERFIL,
-                            cancelButtonIndex: 5,
-                            title: "Selecione uma opção..."
-                        },
-                        buttonIndex => {
-                            this.funcoesMenu(buttonIndex, 'MEU');
-                        }
-                        )}>
-                        <Icon name='menu' style={{color: '#2F7E87'}} />
-                    </Button>
-                </Header>
-            );
-        }
+        return (
+            <Header style={styles.header}>
+                <Icon name="arrow-back" style={{padding:10}} onPress={() => this.voltar()} />
+            </Header>
+        )
     }
 
     /* <View style={{flexDirection:'row',alignItems:'center'}}>
@@ -424,19 +389,55 @@ export default class PerfilUsuario extends Component {
     }
 
     renderBiografia() {
-        return (
-            <View style={{paddingTop:5,height:170}}>
-                <View style={styles.secao}><Text style={styles.titulo}>Sobre</Text></View>
-                <Text style={styles.texto}>{this.state.perfil.quem}</Text>
-            </View>
-        )
+        if (this.state.perfil.quem != null)
+        {
+            if (this.state.mostraItens)
+            {
+                return (
+                    <View style={{paddingTop:5}}>
+                        <TouchableOpacity onPress={this.editarperfil}>
+                            <View style={styles.secao}><Text style={styles.titulo}>Sobre</Text></View>
+                        </TouchableOpacity>
+                        <Text style={styles.texto}>{this.state.perfil.quem}</Text>
+                    </View>
+                )
+            } else {
+                return (
+                    <View style={{paddingTop:5}}>
+                        <View style={styles.secao}><Text style={styles.titulo}>Sobre</Text></View>
+                        <Text style={styles.texto}>{this.state.perfil.quem}</Text>
+                    </View>
+                )
+            }
+        } else {
+            if (this.state.mostraItens)
+            {
+                return (
+                    <View style={{paddingTop:5}}>
+                        <TouchableOpacity onPress={this.editarperfil}>
+                            <View style={styles.secao}><Text style={styles.titulo}>Sobre</Text></View>
+                        </TouchableOpacity>
+                        <Text style={styles.vazio}>Você não possui uma biografia</Text>
+                    </View>
+                )
+            } else {
+                return (
+                    <View style={{paddingTop:5}}>
+                        <View style={styles.secao}><Text style={styles.titulo}>Sobre</Text></View>
+                        <Text style={styles.vazio}>{this.state.perfil.quem} não possui uma biografia</Text>
+                    </View>
+                )
+            }
+        }
     }
 
     renderTags() {
         if (this.state.tags.length > 0) {
             return (
                 <View>
-                    <View style={styles.secao}><Text style={styles.titulo}>Assuntos de Interesse</Text></View>
+                    {this.state.mostraItens == true ? <TouchableOpacity onPress={this.modalEditarTags}>
+                        <View style={styles.secao}><Text style={styles.titulo}>Assuntos de Interesse</Text></View>
+                    </TouchableOpacity> : <View style={styles.secao}><Text style={styles.titulo}>Assuntos de Interesse</Text></View>}
                     <View style={styles.tagsPerfil}>
                         {this.state.tags.map((item, index) => {
                             if (this.state.tags.length > 0) {
@@ -454,7 +455,9 @@ export default class PerfilUsuario extends Component {
         }  else {
             return (
                 <View>
-                    <View style={styles.secao}><Text style={styles.titulo}>Assuntos de Interesse</Text></View>
+                    {this.state.mostraItens == true ? <TouchableOpacity onPress={this.modalEditarTags}>
+                        <View style={styles.secao}><Text style={styles.titulo}>Assuntos de Interesse</Text></View>
+                    </TouchableOpacity> : <View style={styles.secao}><Text style={styles.titulo}>Assuntos de Interesse</Text></View>}
                     <Text style={styles.vazio}>{this.state.mostraItens == true ? 'Você' : this.state.perfil.apelido} não escolheu assuntos</Text>
                 </View>
             )
@@ -466,11 +469,13 @@ export default class PerfilUsuario extends Component {
         {
             return (
                 <View>
-                    <View style={styles.secao}><Text style={styles.titulo}>Histórias de Vida</Text></View>
+                    {this.state.mostraItens == true ? <TouchableOpacity onPress={this.novahistoria}>
+                        <View style={styles.secao}><Text style={styles.titulo}>Histórias de Vida</Text></View>
+                    </TouchableOpacity> : <View style={styles.secao}><Text style={styles.titulo}>Histórias de Vida</Text></View>}
                     <List
                         dataArray={this.state.historias}
                         renderRow={(item) =>
-                            <ListItem onPress={() => this.state.mostraItens ? this.editarhistoria(item) : this.historia(item)}>
+                            <ListItem style={{height:30}} onPress={() => this.state.mostraItens ? this.editarhistoria(item) : this.historia(item)}>
                                 <View style={{flexDirection:'row'}}>
                                     <Text style={{fontSize:12,color:'#2F7E87'}}>{item.titulo}</Text>
                                 </View>
@@ -481,8 +486,55 @@ export default class PerfilUsuario extends Component {
         } else {
             return (
                 <View>
-                    <View style={styles.secao}><Text style={styles.titulo}>Histórias de Vida</Text></View>
+                    {this.state.mostraItens == true ? <TouchableOpacity onPress={this.novahistoria}>
+                        <View style={styles.secao}><Text style={styles.titulo}>Histórias de Vida</Text></View>
+                    </TouchableOpacity> : <View style={styles.secao}><Text style={styles.titulo}>Histórias de Vida</Text></View>}
                     <Text style={styles.vazio}>{this.state.mostraItens == true ? 'Você' : this.state.perfil.apelido} não criou histórias</Text>
+                </View>
+            )
+        }
+    }
+
+    renderConfiguracoes() {
+        if (this.state.mostraItens) {
+            return (
+                <View>
+                    <View style={styles.secao}><Text style={styles.titulo}>Opções</Text></View>
+                    <List>
+                        <ListItem icon onPress={this.reportarModalProblema}>
+                            <Left><Icon name="warning" style={{fontSize:20,color:'orange'}} /></Left>
+                            <Body><Text note>Reportar um Problema</Text></Body>
+                            <Right><Icon name="arrow-up" /></Right>
+                        </ListItem>
+                        <ListItem icon onPress={this.receberNotificacoes}>
+                            <Left><Icon name="notifications" style={{fontSize:20,color:'green'}} /></Left>
+                            <Body><Text note>Receber Notificações</Text></Body>
+                            <Right><Switch value={this.state.perfil.notificar} onValueChange={(valor) => this.receberNotificacoes(valor)} /></Right>
+                        </ListItem>
+                        <ListItem icon onPress={this.trocarPerfil}>
+                            <Left><Icon name="bicycle" style={{fontSize:20,color:'purple'}} /></Left>
+                            <Body><Text note style={{color:'red',fontWeight:'bold'}}>Sair</Text></Body>
+                            <Right><Icon name="exit" /></Right>
+                        </ListItem>
+                    </List>
+                </View>
+            )
+        } else {
+            return (
+                <View>
+                    <View style={styles.secao}><Text style={styles.titulo}>Opções</Text></View>
+                    <List>
+                        <ListItem icon onPress={this.conversar}>
+                            <Left><Icon name="chatboxes" style={{fontSize:20,color:'green'}} /></Left>
+                            <Body><Text note>Enviar Mensagem</Text></Body>
+                            <Right><Icon name="arrow-forward" /></Right>
+                        </ListItem>
+                        <ListItem icon onPress={this.reportarModalDenuncia}>
+                            <Left><Icon name="megaphone" style={{fontSize:20,color:'red'}} /></Left>
+                            <Body><Text note>Denunciar</Text></Body>
+                            <Right><Icon name="arrow-up" /></Right>
+                        </ListItem>
+                    </List>
                 </View>
             )
         }
@@ -622,7 +674,7 @@ const styles = {
     },
     titulo: {
         color: '#4FD3E2',
-        fontSize: 12,
+        fontSize: 15,
         fontWeight: 'bold',
     },
     apelido: {
@@ -697,11 +749,12 @@ const styles = {
         //opacity: 0.75
     },
     secao: {
-        borderBottomWidth: 0.5,
+        borderBottomWidth: 1,
         borderBottomColor: '#2F7E87',
         width:janela.width-50,
         alignItems: 'center',
         alignSelf:'center',
-        paddingTop: 5
+        paddingTop: 10,
+        paddingBottom: 5
     }
 }

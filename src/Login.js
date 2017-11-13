@@ -29,7 +29,7 @@ import Hr from './Hr';
 
 import {MenuAtualizacoes} from './Menu';
 
-import FBSDK, { LoginButton, AccessToken, GraphRequestManager, GraphRequest, LoginManager } from 'react-native-fbsdk';
+import FBSDK, { LoginButton, AccessToken, GraphRequestManager, GraphRequest, LoginManager, AppEventsLogger } from 'react-native-fbsdk';
 
 const { width, height } = Dimensions.get("window");
 
@@ -38,6 +38,8 @@ const logo = require("./images/logo_menu.png");
 const eyhee = require("./images/eyhee.png");
 const lockIcon = require("./images/login1_lock.png");
 const personIcon = require("./images/login1_person.png");
+
+var me_login = '';
 
 export default class Login extends Component {
   constructor(props) {
@@ -50,8 +52,10 @@ export default class Login extends Component {
     };
 
     this.postLogin = this.postLogin.bind(this);
+    this.postLoginFacebook = this.postLoginFacebook.bind(this);
 
-    console.warn(height);
+
+    me_login = this;
 
   }
 
@@ -76,6 +80,58 @@ export default class Login extends Component {
   };
 
 
+  sucessoLogin = (responseJson, primeiroAcesso) => {
+    this.setId(responseJson.idUsuario.toString()).done();
+          
+    Geral.salvarToken(responseJson.idUsuario);
+    this.carregando(false);
+
+    MenuAtualizacoes.atualizaNotificacoes(responseJson.idUsuario.toString());
+    
+    console.warn(responseJson.primeiroAcesso);
+
+    if (responseJson.primeiroAcesso == true) Actions.IntroducaoAssuntos();
+    else Actions.Mensagens();
+  }
+
+  postLoginFacebook(result) {
+    this.carregando(true);
+
+    var fbId = result.id.toString();
+ 
+    //var foto = result.picture.data.url;
+
+
+    fetch(url + '/Login/LogarFacebook', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      facebookId: fbId,
+      dataNasc: result.birthday,
+      email: result.email,
+      nome: result.name,
+      sexo: result.gender
+    })
+  }).then((response) => response.json())
+      .then((responseJson) => {
+        
+        if(responseJson.success) {
+          this.sucessoLogin(responseJson);
+        } else {
+          this.carregando(false);
+          Alert.alert('Erro', responseJson.erro);
+        }
+
+      })
+      .catch((error) => {
+        this.carregando(false);
+        console.warn(error);
+        Alert.alert('Erro.', 'Erro de conexão com a internet. Por favor verifique sua conexão e tente novamente.');
+    });
+  }
 
   postLogin() {
     Keyboard.dismiss();
@@ -93,15 +149,8 @@ export default class Login extends Component {
   }).then((response) => response.json())
       .then((responseJson) => {
         
-        if(responseJson.success){
-          
-          this.setId(responseJson.idUsuario.toString()).done();
-          
-          Geral.salvarToken(responseJson.idUsuario); 
-          this.carregando(false);
-
-          MenuAtualizacoes.atualizaNotificacoes(responseJson.idUsuario.toString());
-          Actions.Mensagens();
+        if(responseJson.success){          
+          this.sucessoLogin(responseJson);
         } else {
           this.carregando(false);
           Alert.alert(' ', responseJson.erro);
@@ -122,6 +171,10 @@ export default class Login extends Component {
     Actions.Cadastro();
   }
 
+  deslogar = () => {
+   
+   LoginManager.logOut();
+  }
 
   _fbAuth() {
     LoginManager.logInWithReadPermissions(['public_profile', 'email', 'user_birthday']).then(
@@ -130,22 +183,23 @@ export default class Login extends Component {
           console.warn('Login cancelled');
         } 
         else {
-          console.warn('Login success with permissions: '
-            +result.grantedPermissions.toString());
 
+//          console.warn('Login success with permissions: '+result.grantedPermissions.toString());
 
+        
           AccessToken.getCurrentAccessToken().then(
             (data) => {
               let accessToken = data.accessToken;
-              alert(accessToken.toString());
+              //alert(accessToken.toString());
 
               const responseInfoCallback = (error, result) => {
                 if (error) {
-                  console.warn(error)
-                  console.warn('Error fetching data: ' + error.toString());
+                  console.warn(error);
+                  alert('Error fetching data: ' + error.toString());
                 } else {
-                  console.log(result)
-                  console.warn('Success fetching data: ' + result.toString());
+                  
+                  me_login.postLoginFacebook(result);
+                  
                 }
               }
 
@@ -275,8 +329,11 @@ export default class Login extends Component {
             <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'row', marginTop: height * 0.018}} onPress={() => this._fbAuth()}>
                <Icon name='logo-facebook' style={{color: '#3b5998', marginRight: 10}}/><Text style={{color: '#3b5998', fontWeight: 'bold'}}>Entrar com Facebook</Text>
             </TouchableOpacity>
-
-
+{/*
+            <TouchableOpacity onPress={() => this.deslogar()}>
+               <Text style={{color: '#3b5998', fontWeight: 'bold'}}>sair</Text>
+            </TouchableOpacity>
+*/}
           
         </View>
         </Content>

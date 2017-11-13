@@ -4,9 +4,11 @@ import {
   AsyncStorage, Alert, Keyboard, Picker, Modal,
   TouchableHighlight, TouchableOpacity, ScrollView
 } from 'react-native';
-import { Container, Header, Left, Right, Body, Button, InputGroup, Input, Item, Icon, Label, Separator, Content, Thumbnail } from 'native-base';
+import { Container, Header, Left, Right, Body, Button, InputGroup,
+    Input, Item, Icon, Label, Separator, Content, Thumbnail } from 'native-base';
 import { Actions, ActionConst } from 'react-native-router-flux';
 import Spinner from 'react-native-loading-spinner-overlay';
+import ImagePicker from 'react-native-image-picker';
 
 import imagens from './Avatar';
 
@@ -33,6 +35,17 @@ var P = f.struct({
     sexo: Genero
 });
 
+var galeriaOpcoes = {
+    title: 'Escolha seu avatar',
+    customButtons: [
+        {name: 'fb', title: 'Escolha uma foto do Facebook'},
+    ],
+    storageOptions: {
+        skipBackup: true,
+        path: 'images'
+    }
+};
+
 export default class EditarPerfil extends Component {
     constructor(props) {
         super(props);
@@ -40,6 +53,7 @@ export default class EditarPerfil extends Component {
         this.state = {
             perfil: this.props.perfil,
             modalImagens: false,
+            avatar: url + '/imagens/perfil/nao_existe.png',
 
             options: {
                 fields: {
@@ -84,9 +98,38 @@ export default class EditarPerfil extends Component {
                 sexo: this.props.perfil.sexo
             }
         }
+
+        this.editar = this.editar.bind(this);
+        this.escolherAvatar = this.escolherAvatar.bind(this);
     }
 
     // FUNÇÕES
+
+    escolherAvatar() {
+        ImagePicker.showImagePicker(galeriaOpcoes, (response) => {
+            console.warn('Response = ', response);
+          
+            if (response.didCancel) {
+              console.warn('User cancelled image picker');
+            }
+            else if (response.error) {
+              console.warn('ImagePicker Error: ', response.error);
+            }
+            else if (response.customButton) {
+              console.warn('User tapped custom button: ', response.customButton);
+            }
+            else {
+              let source = { uri: response.uri };
+          
+              // You can also display the image using data:
+              // let source = { uri: 'data:image/jpeg;base64,' + response.data };
+          
+              this.setState({
+                avatar: source
+              });
+            }
+        });
+    }
 
     editar() {
         var value = this.refs.form.getValue();
@@ -145,25 +188,28 @@ export default class EditarPerfil extends Component {
             <Container>
                 <Header style={styles.header}>
                     <Icon name="arrow-back" style={{padding:10}} onPress={() => this.voltar()} />
-                    <TouchableOpacity onPress={() => this.editar()} style={{padding: 10}}><Text>Salvar</Text></TouchableOpacity>
                 </Header>
-                <Content>
-                <TouchableOpacity onPress={() => {this.setState({modalImagens: true})}}>
-                    <Thumbnail 
-                        large 
-                        style={{paddingBottom:10,alignSelf:'center'}} 
-                        source={{
-                            uri: this.state.perfil.foto == null ? 
-                            url + '/imagens/perfil/nao_existe.png' : 
-                            url + this.state.perfil.foto}}
+                <Content style={{padding:15}}>
+                    <TouchableOpacity onPress={this.escolherAvatar}>
+                        <Image source={{uri: this.state.avatar}} style={styles.avatar} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {this.setState({modalImagens: true})}}>
+                        <Thumbnail 
+                            large 
+                            style={{paddingBottom:10,alignSelf:'center'}} 
+                            source={{
+                                uri: this.state.perfil.foto == null ? 
+                                url + '/imagens/perfil/nao_existe.png' : 
+                                url + this.state.perfil.foto}}
                     />
-                </TouchableOpacity>                
-                    <Form
-                        ref="form"
-                        type={P}
-                        options={this.state.options}
-                        value={this.state.value}
+                    </TouchableOpacity>
+                        <Form
+                            ref="form"
+                            type={P}
+                            options={this.state.options}
+                            value={this.state.value}
                     />
+                    {this.renderAcoes()}
                 </Content>
 
                 <Modal
@@ -196,9 +242,23 @@ export default class EditarPerfil extends Component {
             </Container>
         );
     }
+
+    renderAcoes() {
+        return (
+            <TouchableOpacity activeOpacity={.5} onPress={this.editar}>
+                <View style={styles.button}>
+                    <Text style={styles.buttonText}>Salvar</Text>
+                </View>
+            </TouchableOpacity>
+        )
+    }
 }
 
 const styles = {
+    avatar: {
+        height: 100,
+        width: 100,
+    },
     header: {
         backgroundColor: '#FAFAFA',
         //flexDirection: 'row',
@@ -207,12 +267,14 @@ const styles = {
         height: 40
     },
     button: {
-        backgroundColor: "#91C744",
-        paddingVertical: 20,
+        backgroundColor: "#4FD3E2",
+        //paddingVertical: 20,
         alignItems: "center",
         justifyContent: "center",
-        marginTop: 30,
-        marginBottom: 30
+    },
+    buttonText: {
+        color: "#FFF",
+        fontSize: 18,
     },
     imagens: {
         flexDirection: 'row',
