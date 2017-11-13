@@ -26,7 +26,7 @@ var eyhee = require('./images/eyhee.png');
 var Form = f.form.Form;
 
 var Pessoa = f.struct({
-  quem: f.maybe(f.String)
+  quem: f.String
 });
 
 
@@ -41,6 +41,7 @@ export default class IntroducaoBiografia extends Component {
         fields: {
           quem: {
             placeholder: 'Conte mais sobre você e quais são seus objetivos no aplicativo...',
+            error: 'Este campo deve ser preenchido.',
             multiline: true,
             maxLength: 200,
             stylesheet: {
@@ -72,6 +73,10 @@ export default class IntroducaoBiografia extends Component {
   salvarEContinuar = () => {
     var value = this.refs.form.getValue();
 
+    if (!value) { // if validation fails, value will be null
+      return;
+    }
+    
     var quem = value.quem == null ? " " : value.quem;
 
 
@@ -135,11 +140,13 @@ export default class IntroducaoBiografia extends Component {
         </Button>
         */}
         <Footer style={styles.footer}>
+      {/*
             <TouchableOpacity onPress={() => {this.proxima()}}>
             <Text style={{fontSize: 15, fontWeight: 'bold', margin: 15}}>
               PULAR
             </Text>
           </TouchableOpacity>
+      */}
             <TouchableOpacity onPress={() => {this.salvarEContinuar()}}>
               <Icon name='arrow-forward' style={{margin: 15}}/>
             </TouchableOpacity>
@@ -156,7 +163,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F6F8', 
   },
   footer: {
-    justifyContent: 'space-between', 
+    justifyContent: 'flex-end', 
     alignItems: 'center', 
     backgroundColor: 'transparent', 
     marginLeft: height * 0.021, 

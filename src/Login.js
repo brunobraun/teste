@@ -29,7 +29,7 @@ import Hr from './Hr';
 
 import {MenuAtualizacoes} from './Menu';
 
-import FBSDK, { LoginButton, AccessToken, GraphRequestManager, GraphRequest, LoginManager } from 'react-native-fbsdk';
+import FBSDK, { LoginButton, AccessToken, GraphRequestManager, GraphRequest, LoginManager, AppEventsLogger } from 'react-native-fbsdk';
 
 const { width, height } = Dimensions.get("window");
 
@@ -88,7 +88,9 @@ export default class Login extends Component {
 
     MenuAtualizacoes.atualizaNotificacoes(responseJson.idUsuario.toString());
     
-    if (primeiroAcesso == true) Actions.IntroducaoAssuntos();
+    console.warn(responseJson.primeiroAcesso);
+
+    if (responseJson.primeiroAcesso == true) Actions.IntroducaoAssuntos();
     else Actions.Mensagens();
   }
 
@@ -97,7 +99,8 @@ export default class Login extends Component {
 
     var fbId = result.id.toString();
  
-    var foto = result.picture.data.url;
+    //var foto = result.picture.data.url;
+
 
     fetch(url + '/Login/LogarFacebook', {
     method: 'POST',
@@ -168,6 +171,10 @@ export default class Login extends Component {
     Actions.Cadastro();
   }
 
+  deslogar = () => {
+   
+   LoginManager.logOut();
+  }
 
   _fbAuth() {
     LoginManager.logInWithReadPermissions(['public_profile', 'email', 'user_birthday']).then(
@@ -176,10 +183,10 @@ export default class Login extends Component {
           console.warn('Login cancelled');
         } 
         else {
-          console.warn('Login success with permissions: '
-            +result.grantedPermissions.toString());
 
+//          console.warn('Login success with permissions: '+result.grantedPermissions.toString());
 
+        
           AccessToken.getCurrentAccessToken().then(
             (data) => {
               let accessToken = data.accessToken;
@@ -188,11 +195,11 @@ export default class Login extends Component {
               const responseInfoCallback = (error, result) => {
                 if (error) {
                   console.warn(error);
-                  console.warn('Error fetching data: ' + error.toString());
+                  alert('Error fetching data: ' + error.toString());
                 } else {
                   
                   me_login.postLoginFacebook(result);
-                  console.warn('Success fetching data: ' + result.toString());
+                  
                 }
               }
 
@@ -322,8 +329,11 @@ export default class Login extends Component {
             <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'row', marginTop: height * 0.018}} onPress={() => this._fbAuth()}>
                <Icon name='logo-facebook' style={{color: '#3b5998', marginRight: 10}}/><Text style={{color: '#3b5998', fontWeight: 'bold'}}>Entrar com Facebook</Text>
             </TouchableOpacity>
-
-
+{/*
+            <TouchableOpacity onPress={() => this.deslogar()}>
+               <Text style={{color: '#3b5998', fontWeight: 'bold'}}>sair</Text>
+            </TouchableOpacity>
+*/}
           
         </View>
         </Content>

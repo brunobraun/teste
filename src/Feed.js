@@ -332,7 +332,7 @@ export default class Feed extends Component {
       <StyleProvider style={getTheme(material)}>
         <Container>
           <View style={styles.header}>
-            <Segment style={{backgroundColor: 'blue'}}>
+            <Segment>
               <Button first active={this.state.ativo == 'Feed' ? true : false} onPress={() => this.getPublicacoes(false)}><Text>Feed</Text></Button>
               <Button last active={this.state.ativo == 'Favoritos' ? true : false} onPress={() => this.getPublicacoes(true)}><Text>Favoritos</Text></Button>
             </Segment>

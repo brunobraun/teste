@@ -42,7 +42,6 @@ var Form = f.form.Form;
 var Genero = f.enums({
   M: 'Masculino',
   F: 'Feminino',
-  L: 'LGBT',
   N: 'Prefiro não informar'
 });
 

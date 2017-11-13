@@ -39,13 +39,13 @@ export default class Splash extends Component {
         let value = await AsyncStorage.getItem('meu_id');
         if (value != null && value != undefined) {
           
-           MeuId.setId(value);
+          MeuId.setId(value);
 
-           SignalR.conectarSignalR();
+          SignalR.conectarSignalR();
           
-           Geral.salvarToken(value);  
+          Geral.salvarToken(value);  
 
-           MenuAtualizacoes.atualizaNotificacoes(value);
+          MenuAtualizacoes.atualizaNotificacoes(value);
           
 
           setTimeout(() => {Actions.Mensagens()}, 200);
@@ -53,6 +53,7 @@ export default class Splash extends Component {
         }
         else {
           setTimeout(() => {Actions.PrimeiroAcessoIntroducao()}, 200);
+          //setTimeout(() => {Actions.IntroducaoAssuntos()}, 200);
         }
         return true;
     }

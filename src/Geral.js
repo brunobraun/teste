@@ -29,7 +29,7 @@ export default class Geral {
 	        .then((responseJson) => {
 
 	          if(responseJson.sucesso){
-	          	//console.warn('token salva no servidor');
+	          	console.warn('token salva no servidor');
 	          } else {
 	            Alert.alert('Erro', responseJson.erro);
 	          }

@@ -17,6 +17,8 @@ import { Actions } from 'react-native-router-flux';
 
 import MeuId from './MeuId';
 
+import SugerirTag from './SugerirTag';
+
 const { width, height } = Dimensions.get("window");
 
 var eyhee = require('./images/eyhee.png');
@@ -28,7 +30,8 @@ export default class IntroducaoAssuntos extends Component {
 
     this.state = {
        editarTags: [],
-       carregando: false
+       carregando: false,
+       modalSugerirTag: false
 
     }
 
@@ -136,9 +139,21 @@ export default class IntroducaoAssuntos extends Component {
     
   }
 
+  fecharSugerirTag = () => {
+    this.setState({modalSugerirTag: false});
+  }
+
+  renderSugerirTag = () => {
+    return (
+      <SugerirTag fecharSugerirTag={this.fecharSugerirTag.bind(this)} modalSugerirTag={this.state.modalSugerirTag} />
+    )
+  }
+
   render() {
     return (
       <Container style={styles.container}>
+        {this.renderSugerirTag()}
+
         <Content contentContainerStyle={{alignItems: 'center', marginTop: 20, justifyContent: 'flex-start', flex: 1, marginLeft: height * 0.043, marginRight: height * 0.043}}>
           <View style={{alignItems: 'stretch'}}>  
 
@@ -153,10 +168,20 @@ export default class IntroducaoAssuntos extends Component {
                       {this.renderTags()}               
 
                 </ScrollView>
+                <Footer style={{height: 30, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center'}}>
+
+                    <Text>
+                      Não encontrou? 
+                    </Text>
+                    <TouchableOpacity onPress={() => { this.setState({modalSugerirTag: true})} }>
+                      <Text style={{color: '#555555', fontWeight: 'bold'}}> Sugira aqui</Text>
+                    </TouchableOpacity>
+                </Footer>
                 </Card>
 
 
           </View>
+          
         </Content>
         {/*
         <Button block style={{marginLeft: height * 0.043, marginRight: height * 0.043 }} onPress={() => {this.salvarEContinuar()}}>
