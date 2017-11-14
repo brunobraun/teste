@@ -277,12 +277,35 @@ export default class Mensagens extends Component {
   }
 
 
+  autenticado = () => {
+    fetch(url + '/tagsugestao/Teste', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic QWxhZGRpbjpPcGVuU2VzYW1l',
+        }
+
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+
+        console.warn(responseJson.user);
+
+      })
+      .catch((error) => {
+        console.warn(error);
+      });
+  }
+
   render() {
     return (
 
       <Container style={{backgroundColor: '#FFFFFF'}}>
           <Header style={styles.header}>
-            <Text>Conversas</Text>            
+            <TouchableOpacity onPress={() => {this.autenticado()}}>
+              <Text>Conversas</Text>
+            </TouchableOpacity>      
           </Header>
          
 
