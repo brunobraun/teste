@@ -89,6 +89,7 @@ export default class Historias extends Component {
             body: JSON.stringify({
                 idUsuario1: this.meu_id,
                 idUsuario2: item.idUsuario,
+                tipoConexao: 1
             })
         }).then((response) => response.json())
             .then((responseJson) => {

@@ -149,6 +149,7 @@ export default class PerfilUsuario extends Component {
             body: JSON.stringify({
                 idUsuario1: this.meu_id,
                 idUsuario2: this.state.perfil.idUsuario,
+                tipoConexao: 0
             })
         }).then((response) => response.json())
             .then((responseJson) => {

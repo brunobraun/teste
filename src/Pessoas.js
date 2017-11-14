@@ -76,6 +76,7 @@ export default class Pessoas extends Component {
             body: JSON.stringify({
                 idUsuario1: this.meu_id,
                 idUsuario2: item.usuario.idUsuario,
+                tipoConexao: 0
             })
         }).then((response) => response.json())
             .then((responseJson) => {
