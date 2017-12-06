@@ -230,7 +230,7 @@ export default class Mensagens extends Component {
                 renderRow={(item) =>
                     <ListItem onPress={() => {this.renderChat(item.id, item.nome, item.foto, item.idChatConexao)}} avatar >
                     <Left>
-                        <Thumbnail  source={{uri: item.foto == null ? url + '/imagens/perfil/nao_existe.png' : url + item.foto }} />
+                        <Thumbnail  source={{uri: item.foto == null ? url + '/imagens/perfil/nao_existe.png' : item.foto }} />
                     </Left>
                     <Body>
                         <Text>{item.nome}</Text>

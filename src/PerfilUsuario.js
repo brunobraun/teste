@@ -368,7 +368,7 @@ export default class PerfilUsuario extends Component {
                 <Left style={{flexDirection:'row',alignItems:'center',paddingTop:10,paddingLeft:10}}>
                     <Thumbnail
                         style={styles.avatar}
-                        source={{uri: this.state.perfil.foto == null ? url + '/imagens/perfil/nao_existe.png' : url + this.state.perfil.foto}}
+                        source={{uri: this.state.perfil.foto == null ? url + '/imagens/perfil/nao_existe.png' : this.state.perfil.foto}}
                     />
                     <View style={{flexDirection: 'column',alignItems:'flex-start',paddingLeft:10}}>
                         <Text style={styles.apelido}>{this.state.perfil.apelido}</Text>
