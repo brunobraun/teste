@@ -41,7 +41,7 @@ export default {
   checkboxTickColor: "#fff",
 
   // Segment
-  segmentBackgroundColor: "#51D9E7",
+  segmentBackgroundColor: "#FAFAFA",
   segmentActiveBackgroundColor: "#51D9E7",
   segmentTextColor: "#51D9E7",
   segmentActiveTextColor: "#51D9E7",

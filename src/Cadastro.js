@@ -175,11 +175,11 @@ export default class Cadastro extends Component {
   
 
   abretermos() {
-    Linking.canOpenURL("http://www.eyhee.com.br/termosdeusuario.html").then(supported => {
+    Linking.canOpenURL("https://www.ombroamigo.com.br/termosdeusuario.html").then(supported => {
       if (!supported) {
-        Alert.alert('Termos de privacidade', 'Não foi possível abrir termos de usuário. Por favor acesse: http://www.eyhee.com.br/termosdeusuario.html');
+        Alert.alert('Termos de privacidade', 'Não foi possível abrir termos de usuário. Por favor acesse: https://www.ombroamigo.com.br/termosdeusuario.html');
       } else {
-        return Linking.openURL('http://www.eyhee.com.br/termosdeusuario.html');
+        return Linking.openURL('https://www.ombroamigo.com.br/termosdeusuario.html');
       }
     }).catch(err => console.warn('An error occurred', err));
   }

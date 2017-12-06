@@ -89,6 +89,7 @@ export default class Historias extends Component {
             body: JSON.stringify({
                 idUsuario1: this.meu_id,
                 idUsuario2: item.idUsuario,
+                tipoConexao: 1
             })
         }).then((response) => response.json())
             .then((responseJson) => {
@@ -167,7 +168,7 @@ export default class Historias extends Component {
                         <Text note style={styles.nome}>por {item.nome}</Text>
                         <Thumbnail
                             style={styles.avatar}
-                            source={{uri: item.foto == null ? url + '/imagens/perfil/nao_existe.png' : url + item.foto}}
+                            source={{uri: item.foto == null ? url + '/imagens/perfil/nao_existe.png' : item.foto}}
                         />
                     </View>
                     <View style={styles.scroll}>

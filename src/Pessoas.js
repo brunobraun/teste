@@ -76,6 +76,7 @@ export default class Pessoas extends Component {
             body: JSON.stringify({
                 idUsuario1: this.meu_id,
                 idUsuario2: item.usuario.idUsuario,
+                tipoConexao: 0
             })
         }).then((response) => response.json())
             .then((responseJson) => {
@@ -161,7 +162,7 @@ export default class Pessoas extends Component {
                 <View style={styles.topo}>
                     <Thumbnail
                         style={styles.avatar}
-                        source={{uri: item.usuario.foto == null ? url + '/imagens/perfil/nao_existe.png' : url + item.usuario.foto}}
+                        source={{uri: item.usuario.foto == null ? url + '/imagens/perfil/nao_existe.png' :  item.usuario.foto}}
                     />
                 </View>
                 <View style={{flexDirection:'row'}}>

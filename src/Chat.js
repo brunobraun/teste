@@ -112,9 +112,7 @@ export default class Chat extends Component {
     } else {
       SignalR.enviarMensagem(this.meu_id, this.state.envia_id, messages[messages.length-1].text, this.props.idChatConexao);
 
-    }
-    
-    
+    }    
 
     // Se enviou msg por pessoas ou histórias, cria conexao entre os dois ids
     /*if ((this.props.tipoConexao == 1) || (this.props.tipoConexao == 2)) {
@@ -509,7 +507,7 @@ export default class Chat extends Component {
             </View>
             <View style={styles.body}>
                 <TouchableOpacity style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}} onPress={() => {this.renderPessoa()}}>
-                  <Thumbnail source={{uri: this.props.foto == null ? url + '/imagens/perfil/nao_existe.png' : url + this.props.foto}} />
+                  <Thumbnail source={{uri: this.props.foto == null ? url + '/imagens/perfil/nao_existe.png' : this.props.foto}} />
                   <Text style={{fontWeight: 'bold'}}>{this.props.nome_usuario}</Text>
                 </TouchableOpacity>
             </View>
