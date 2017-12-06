@@ -9,6 +9,7 @@ import { Container, Header, Left, Right, Body, Button, InputGroup,
 import { Actions, ActionConst } from 'react-native-router-flux';
 import Spinner from 'react-native-loading-spinner-overlay';
 import ImagePicker from 'react-native-image-picker';
+import { RNS3 } from 'react-native-aws3';
 
 import imagens from './Avatar';
 
@@ -99,33 +100,60 @@ export default class EditarPerfil extends Component {
 
         this.editar = this.editar.bind(this);
         this.escolherAvatar = this.escolherAvatar.bind(this);
-        //this.salvarAvatar = this.salvarAvatar.bind(this);
     }
 
     // FUNÇÕES
 
     escolherAvatar() {
         let source = '';
-        let dados = '';
+        //let dados = '';
         let nome = '';
         let path = '';
+        let tipo = '';
 
         ImagePicker.launchImageLibrary(galeriaOpcoes, (response) => {
             if (response.error) {
-              console.warn('ImagePicker Error: ', response.error);
+              console.warn('ImagePicker: ', response.error);
             }
             else {
               source = response.uri;
               nome = response.fileName;
               path = response.path;
-              dados = 'data:image/jpeg;base64,' + response.data;
+              tipo = response.type;
+              //dados = 'data:image/jpeg;base64,' + response.data;
               this.setState({ avatar: source });
-              this.salvarAvatar(dados, nome, path);
+              this.salvarAvatarAWS(nome, tipo, path);
             }
         });
     }
 
-    salvarAvatar(dados, nome, path) {
+    salvarAvatarAWS(nome, tipo, path) {
+        var img = {
+            uri: "file://"+path,
+            name: nome,
+            type: tipo
+        }
+          
+        var info = {
+            keyPrefix: "Avatares/",
+            bucket: "eyheebucket",
+            region: "sa-east-1",
+            accessKey: "AKIAIH3OUEQOEWSHYMVQ",
+            secretKey: "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",
+            successActionStatus: 201
+        }
+
+        RNS3.put(img, info).then(response => {
+            if (response.status !== 201)
+                throw new Error("Failed to upload image to S3");
+            //console.warn(response.body);
+            this.salvarAvatarURL(nome);
+        }).catch((error) => { console.warn("RNS3: " + error); });
+    }
+
+    salvarAvatarURL(nome) {
+        let uri = "https://s3-sa-east-1.amazonaws.com/eyheebucket/Avatares/"+nome;
+
         fetch(url + '/usuario/SalvarAvatar', {
             method: 'POST',
             headers: {
@@ -133,15 +161,13 @@ export default class EditarPerfil extends Component {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                dados: dados,
-                nome: nome,
-                path: path,
-                id: this.state.perfil.idUsuario
+                id: this.state.perfil.idUsuario,
+                url: uri
             })
         }).then((response) => response.json())
             .then((responseJson) => {
                 if (responseJson.sucesso) {
-                    Alert.alert('Sucesso', 'Avatar alterado!');
+                    Alert.alert('Sucesso!', 'Avatar alterado!');
                 } else {
                     Alert.alert('Falha!', responseJson.erro);
                 }
