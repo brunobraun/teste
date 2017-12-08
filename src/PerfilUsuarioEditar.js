@@ -42,7 +42,9 @@ var galeriaOpcoes = {
     storageOptions: {
         skipBackup: true,
         path: 'images'
-    }
+    },
+    returnBase64Image: true,
+    returnIsVertical: false
 };
 
 export default class EditarPerfil extends Component {
@@ -106,7 +108,7 @@ export default class EditarPerfil extends Component {
 
     escolherAvatar() {
         let source = '';
-        //let dados = '';
+        let dados = '';
         let nome = '';
         let path = '';
         let tipo = '';
@@ -120,9 +122,8 @@ export default class EditarPerfil extends Component {
               nome = response.fileName;
               path = response.path;
               tipo = response.type;
-              //dados = 'data:image/jpeg;base64,' + response.data;
+              dados = 'data:image/jpeg;base64,' + response.data;
               this.setState({ avatar: source });
-              this.salvarAvatarAWS(nome, tipo, path);
             }
         });
     }
@@ -136,23 +137,24 @@ export default class EditarPerfil extends Component {
           
         var info = {
             keyPrefix: "Avatares/",
-            bucket: "eyheebucket",
+            bucket: "eyheeb",
             region: "sa-east-1",
-            accessKey: "AKIAIH3OUEQOEWSHYMVQ",
-            secretKey: "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",
+            accessKey: "AKIAJ575LURV743GUVUA",
+            secretKey: "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",
             successActionStatus: 201
         }
 
         RNS3.put(img, info).then(response => {
+            console.warn(response.status);
             if (response.status !== 201)
                 throw new Error("Failed to upload image to S3");
             //console.warn(response.body);
-            this.salvarAvatarURL(nome);
+            this.salvarAvatarURL(nome, dados);
         }).catch((error) => { console.warn("RNS3: " + error); });
     }
 
-    salvarAvatarURL(nome) {
-        let uri = "https://s3-sa-east-1.amazonaws.com/eyheebucket/Avatares/"+nome;
+    salvarAvatarURL(nome, dados) {
+        let uri = "https://s3-sa-east-1.amazonaws.com/eyheeb/Avatares/"+nome;
 
         fetch(url + '/usuario/SalvarAvatar', {
             method: 'POST',
@@ -162,7 +164,9 @@ export default class EditarPerfil extends Component {
             },
             body: JSON.stringify({
                 id: this.state.perfil.idUsuario,
-                url: uri
+                url: uri,
+                nome: nome,
+                dados: dados
             })
         }).then((response) => response.json())
             .then((responseJson) => {
@@ -191,7 +195,7 @@ export default class EditarPerfil extends Component {
             dataNasc: data,
             quem: value.quem,
             sexo: value.sexo,
-            foto: this.state.perfil.foto
+            foto: url + this.state.perfil.foto
         };
         
         fetch(url + '/usuario/editarperfil', {
@@ -233,9 +237,6 @@ export default class EditarPerfil extends Component {
                     <Icon name="arrow-back" style={{padding:10}} onPress={() => this.voltar()} />
                 </Header>
                 <Content style={{padding:15}}>
-                    <TouchableOpacity onPress={this.escolherAvatar}>
-                        <Image source={{uri: this.state.avatar}} style={styles.avatar} />
-                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => {this.setState({modalImagens: true})}}>
                         <Thumbnail 
                             large 
