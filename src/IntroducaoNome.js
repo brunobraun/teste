@@ -7,9 +7,11 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
+  Modal,
+  ScrollView,
   Alert
 } from 'react-native';
-import { Container,Footer, Content, Icon, CheckBox, Button } from 'native-base';
+import { Container,Footer, Content, Icon, CheckBox, Button, Thumbnail } from 'native-base';
 import { Actions } from 'react-native-router-flux';
 
 import MeuId from './MeuId';
@@ -34,6 +36,7 @@ export default class IntroducaoNome extends Component {
     super(props); 
 
     this.state = {
+      modalImagens: false,
       carregando: false,
       anonimo: false,
       notificacoes: true,
@@ -51,6 +54,8 @@ export default class IntroducaoNome extends Component {
         nomeOuApelido: ''
       }
     }
+
+    this.foto = null;
 
   }
 
@@ -124,7 +129,8 @@ export default class IntroducaoNome extends Component {
       idUsuario: MeuId.getId(),
       nome: value.nomeOuApelido,
       anonimo: this.state.anonimo,
-      naoQuerNotificacoes: !this.state.notificacoes
+      naoQuerNotificacoes: !this.state.notificacoes,
+      foto: url + this.foto
     })
     }).then((response) => response.json())
         .then((responseJson) => {
@@ -143,13 +149,76 @@ export default class IntroducaoNome extends Component {
     
   }
 
+escolheFoto = (item) => {
+        this.foto = item;
+        var estadoAtualNotificacoes = this.state.notificacoes;
+
+        var anonimo = this.state.anonimo;
+        var options = this.state.options;
+        var value = this.state.value;
+
+
+        var value = this.refs.form.getValue();
+
+        this.setState({modalImagens: false,
+          notificacoes: estadoAtualNotificacoes, 
+          anonimo: anonimo,
+          value: value});
+    }
+
+  handlerModal = (valor) => {
+      var estadoAtualNotificacoes = this.state.notificacoes;
+
+        var anonimo = this.state.anonimo;
+        var options = this.state.options;
+        var value = this.state.value;
+
+
+        var value = this.refs.form.getValue();
+
+        this.setState({modalImagens: valor,
+          notificacoes: estadoAtualNotificacoes, 
+          anonimo: anonimo,
+          value: value});
+  }
 
   render() {
     return (
       <Container style={styles.container}>
+
+     
+
       <Spinner visible={this.state.carregando} textStyle={{color: '#FFF'}} />
         <Content contentContainerStyle={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
           
+        <Modal
+              animationType={"slide"}
+              transparent={false}
+              visible={this.state.modalImagens}
+              onRequestClose={() => {this.handlerModal(false)}}
+          >
+              <View style={{marginTop: 20, justifyContent:'center' }}>
+                  <View style={{alignItems: 'flex-start', paddingLeft: 20}} >
+                      <TouchableOpacity onPress={() => {this.handlerModal(false)}}>
+                          <Icon name='arrow-back' style={{color: 'black'}}/>
+                      </TouchableOpacity>
+                  </View>
+                  <ScrollView>
+                      <View style={styles.imagens}>
+                      {
+                          imagens.map((item, index) => {
+                          return (
+                              <TouchableOpacity key={index} onPress={ () => {this.escolheFoto(item)} }>
+                                  <Thumbnail key={index} large source={{uri: url + item }} />
+                              </TouchableOpacity>
+                          )
+                          })
+                      }
+                      </View>
+                  </ScrollView>
+              </View>
+          </Modal>
+
           <View style={{alignItems: 'stretch', marginLeft: height * 0.043, marginRight: height * 0.043}}>
 
             <View style={{alignItems: 'center'}}>
@@ -173,7 +242,7 @@ export default class IntroducaoNome extends Component {
                 options={this.state.options}
                 value={this.state.value}
               />
-             
+              <TouchableOpacity onPress={() => {this.handlerModal(true)}} style={{flexDirection: 'row', alignSelf: 'center', marginTop: 10,justifyContent: 'center',alignItems: 'center'}}><Icon name='ios-camera-outline' /><Text> Escolha uma imagem de perfil</Text></TouchableOpacity>
             </View>
 
             
@@ -223,5 +292,13 @@ const styles = StyleSheet.create({
     width: null,
     height: null,
     flex: 1
-  }
+  },
+  imagens: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        paddingTop: 10,
+        paddingBottom: 25,
+    },
 });

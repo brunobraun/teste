@@ -48,11 +48,11 @@ export default class Splash extends Component {
           MenuAtualizacoes.atualizaNotificacoes(value);
           
 
-          setTimeout(() => {Actions.Mensagens()}, 200);
+          setTimeout(() => {Actions.Mensagens()}, 2000);
           
         }
         else {
-          setTimeout(() => {Actions.PrimeiroAcessoIntroducao()}, 200);
+          setTimeout(() => {Actions.PrimeiroAcessoIntroducao()}, 2000);
           //setTimeout(() => {Actions.IntroducaoAssuntos()}, 200);
         }
         return true;
