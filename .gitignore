@@ -55,6 +55,7 @@ buck-out/
 # eyhee
 yarn.lock
 ios/
+<<<<<<< HEAD
 package.json
 package.json
 package.json
@@ -62,3 +63,5 @@ package.json
 package.json
 package.json
 package.json
+=======
+>>>>>>> origin/master
