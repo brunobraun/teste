@@ -244,14 +244,14 @@ export default class EditarPerfil extends Component {
                             source={{
                                 uri: this.state.perfil.foto == null ? 
                                 url + '/imagens/perfil/nao_existe.png' : 
-                                url + this.state.perfil.foto}}
-                    />
+                                this.state.perfil.foto}}
+                        />
                     </TouchableOpacity>
-                        <Form
-                            ref="form"
-                            type={P}
-                            options={this.state.options}
-                            value={this.state.value}
+                    <Form
+                        ref="form"
+                        type={P}
+                        options={this.state.options}
+                        value={this.state.value}
                     />
                     {this.renderAcoes()}
                 </Content>
