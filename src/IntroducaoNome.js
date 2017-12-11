@@ -119,6 +119,9 @@ export default class IntroducaoNome extends Component {
 
     this.carregando(true);
 
+    console.warn(this.foto);
+    var foto = this.foto == null ? null : url + this.foto;
+
     fetch(url + '/Login/AtualizaNome', {
     method: 'POST',
     headers: {
@@ -130,7 +133,7 @@ export default class IntroducaoNome extends Component {
       nome: value.nomeOuApelido,
       anonimo: this.state.anonimo,
       naoQuerNotificacoes: !this.state.notificacoes,
-      foto: url + this.foto
+      foto: foto
     })
     }).then((response) => response.json())
         .then((responseJson) => {
