@@ -46,10 +46,11 @@ export default class Chat extends Component {
     this.BUTTONS = [
       'Encerrar Conversa',
       'Denunciar',
+      'Doar',
       'Cancelar',
     ];
 
-    this.CANCEL_INDEX = 2;
+    this.CANCEL_INDEX = 3;
 
     this.onSend = this.onSend.bind(this);
     this.msgEnviada = this.msgEnviada.bind(this);
@@ -262,11 +263,28 @@ export default class Chat extends Component {
   	  });
   }
 
+  doar = () => {
+
+    fetch(url + '/validacao/clique', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        idUsuario: MeuId.getId(),
+        tipo: 2
+      })
+    });
+    alert('Obrigado pela sua intenção! Em breve isso será possível.');
+  }
+
   funcoesMenu(indexMenu) {
 
     /*
       'Desfazer Combinação',
       'Denunciar',
+      'Doar',
       'Cancelar',
     */
 
@@ -280,6 +298,9 @@ export default class Chat extends Component {
             break;
         case 1:
             this.setState({modalDenuncia: true});
+            break;
+        case 2:
+            this.doar();
             break;
     }
   }
