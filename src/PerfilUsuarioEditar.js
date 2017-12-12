@@ -9,7 +9,7 @@ import { Container, Header, Left, Right, Body, Button, InputGroup,
 import { Actions, ActionConst } from 'react-native-router-flux';
 import Spinner from 'react-native-loading-spinner-overlay';
 import ImagePicker from 'react-native-image-picker';
-import { RNS3 } from 'react-native-aws3';
+//import { RNS3 } from 'react-native-aws3';
 
 import imagens from './Avatar';
 
@@ -35,17 +35,17 @@ var P = f.struct({
     sexo: Sexo
 });
 
-var galeriaOpcoes = {
-    mediaType: 'photo',
-    //maxWidth: 100,
-    //maxHeight: 100,
-    storageOptions: {
-        skipBackup: true,
-        path: 'images'
-    },
-    returnBase64Image: true,
-    returnIsVertical: false
-};
+// var galeriaOpcoes = {
+//     mediaType: 'photo',
+//     //maxWidth: 100,
+//     //maxHeight: 100,
+//     storageOptions: {
+//         skipBackup: true,
+//         path: 'images'
+//     },
+//     returnBase64Image: true,
+//     returnIsVertical: false
+// };
 
 export default class EditarPerfil extends Component {
     constructor(props) {
@@ -101,82 +101,82 @@ export default class EditarPerfil extends Component {
         }
 
         this.editar = this.editar.bind(this);
-        this.escolherAvatar = this.escolherAvatar.bind(this);
+        //this.escolherAvatar = this.escolherAvatar.bind(this);
     }
 
     // FUNÇÕES
 
-    escolherAvatar() {
-        let source = '';
-        let dados = '';
-        let nome = '';
-        let path = '';
-        let tipo = '';
+    // escolherAvatar() {
+    //     let source = '';
+    //     let dados = '';
+    //     let nome = '';
+    //     let path = '';
+    //     let tipo = '';
 
-        ImagePicker.launchImageLibrary(galeriaOpcoes, (response) => {
-            if (response.error) {
-              console.warn('ImagePicker: ', response.error);
-            }
-            else {
-              source = response.uri;
-              nome = response.fileName;
-              path = response.path;
-              tipo = response.type;
-              dados = 'data:image/jpeg;base64,' + response.data;
-              this.setState({ avatar: source });
-            }
-        });
-    }
+    //     ImagePicker.launchImageLibrary(galeriaOpcoes, (response) => {
+    //         if (response.error) {
+    //           console.warn('ImagePicker: ', response.error);
+    //         }
+    //         else {
+    //           source = response.uri;
+    //           nome = response.fileName;
+    //           path = response.path;
+    //           tipo = response.type;
+    //           dados = 'data:image/jpeg;base64,' + response.data;
+    //           this.setState({ avatar: source });
+    //         }
+    //     });
+    // }
 
-    salvarAvatarAWS(nome, tipo, path) {
-        var img = {
-            uri: "file://"+path,
-            name: nome,
-            type: tipo
-        }
+    // salvarAvatarAWS(nome, tipo, path) {
+    //     var img = {
+    //         uri: "file://"+path,
+    //         name: nome,
+    //         type: tipo
+    //     }
           
-        var info = {
-            keyPrefix: "Avatares/",
-            bucket: "eyheeb",
-            region: "sa-east-1",
-            accessKey: "AKIAJ575LURV743GUVUA",
-            secretKey: "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",
-            successActionStatus: 201
-        }
+    //     var info = {
+    //         keyPrefix: "Avatares/",
+    //         bucket: "eyheeb",
+    //         region: "sa-east-1",
+    //         accessKey: "AKIAJ575LURV743GUVUA",
+    //         secretKey: "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",
+    //         successActionStatus: 201
+    //     }
 
-        RNS3.put(img, info).then(response => {
-            console.warn(response.status);
-            if (response.status !== 201)
-                throw new Error("Failed to upload image to S3");
-            //console.warn(response.body);
-            this.salvarAvatarURL(nome, dados);
-        }).catch((error) => { console.warn("RNS3: " + error); });
-    }
+    //     RNS3.put(img, info).then(response => {
+    //         console.warn(response.status);
+    //         if (response.status !== 201)
+    //             throw new Error("Failed to upload image to S3");
+    //         //console.warn(response.body);
+    //         this.salvarAvatarURL(nome, dados);
+    //     }).catch((error) => { console.warn("RNS3: " + error); });
+    // }
 
-    salvarAvatarURL(nome, dados) {
-        let uri = "https://s3-sa-east-1.amazonaws.com/eyheeb/Avatares/"+nome;
+    // salvarAvatarURL(nome, dados) {
+    //     let uri = "https://s3-sa-east-1.amazonaws.com/eyheeb/Avatares/"+nome;
 
-        fetch(url + '/usuario/SalvarAvatar', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id: this.state.perfil.idUsuario,
-                url: uri,
-                nome: nome,
-                dados: dados
-            })
-        }).then((response) => response.json())
-            .then((responseJson) => {
-                if (responseJson.sucesso) {
-                    Alert.alert('Sucesso!', 'Avatar alterado!');
-                } else {
-                    Alert.alert('Falha!', responseJson.erro);
-                }
-            }).catch((error) => {console.warn('salvarAvatar: ' + error); });
-    }
+    //     fetch(url + '/usuario/SalvarAvatar', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Accept': 'application/json',
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({
+    //             id: this.state.perfil.idUsuario,
+    //             url: uri,
+    //             nome: nome,
+    //             dados: dados
+    //         })
+    //     }).then((response) => response.json())
+    //         .then((responseJson) => {
+    //             if (responseJson.sucesso) {
+    //                 Alert.alert('Sucesso!', 'Avatar alterado!');
+    //             } else {
+    //                 Alert.alert('Falha!', responseJson.erro);
+    //             }
+    //         }).catch((error) => {console.warn('salvarAvatar: ' + error); });
+    // }
 
     editar() {
         var value = this.refs.form.getValue();
@@ -195,7 +195,7 @@ export default class EditarPerfil extends Component {
             dataNasc: data,
             quem: value.quem,
             sexo: value.sexo,
-            foto: url + this.state.perfil.foto
+            foto: this.state.perfil.foto
         };
         
         fetch(url + '/usuario/editarperfil', {
@@ -209,19 +209,15 @@ export default class EditarPerfil extends Component {
             })
         }).then((response) => response.json())
             .then((responseJson) => {
-                if (responseJson.sucesso) {
+                if (responseJson.sucesso)
                     this.voltar();
-                    //Alert.alert(' ', 'Editado com sucesso!');
-                } else {
-                    Alert.alert(' ', responseJson.erro);
-                }    
             }).catch((error) => {console.warn(error); });
     }
 
     escolheFoto = (item) => {
-        this.state.perfil.foto = item;
-        this.setState({perfil: this.state.perfil});
         this.setState({modalImagens: false});
+        this.state.perfil.foto = url + item;
+        this.setState({perfil: this.state.perfil});
     }
 
     voltar() {
